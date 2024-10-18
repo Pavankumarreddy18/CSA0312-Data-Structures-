@@ -1,7 +1,7 @@
 //C program for push and pop
 
 #include<stdio.h>
-#define size 4
+#define size 40
 int top=-1,array[size];
 void push(int value);
 void pop();
@@ -11,6 +11,7 @@ int main(){
   push(20);
   push(30);
   push(40);
+  push(50);
   printf("stack after push:\n");
   show();
   pop();
@@ -33,7 +34,7 @@ void pop(){
     printf("stack is empty");
   }
   else{
-    printf("poped value=%d\n",array[--top+1]);
+    printf("poped value=%d\n",array[top--]);
   }
 }
 void show(){
@@ -42,7 +43,7 @@ void show(){
   }
   else{
   	int i;
-    for( i=top;i>=0;i--){
+    for(i=top;i>=0;i--){
       printf("%d\n",array[i]);
     }
   }
