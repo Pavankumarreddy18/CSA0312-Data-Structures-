@@ -1,4 +1,4 @@
-//C program for 
+//C program for double linked list
 
 #include <stdio.h>
 #include <stdlib.h>
