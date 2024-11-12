@@ -1,0 +1,182 @@
+//C program for red black tree
+
+#include <stdio.h>
+#include <stdlib.h>
+
+// Enum for color of nodes
+enum Color { RED, BLACK };
+
+// Structure for a node in the Red-Black Tree
+typedef struct Node {
+    int data;
+    enum Color color;
+    struct Node *left, *right, *parent;
+} Node;
+
+// Function to create a new node
+Node* createNode(int data) {
+    Node* node = (Node*)malloc(sizeof(Node));
+    node->data = data;
+    node->color = RED; // New nodes are always red initially
+    node->left = node->right = node->parent = NULL;
+    return node;
+}
+
+// Helper function for left rotation
+void leftRotate(Node** root, Node* x) {
+    Node* y = x->right;
+    x->right = y->left;
+    if (y->left != NULL) {
+        y->left->parent = x;
+    }
+    y->parent = x->parent;
+    if (x->parent == NULL) {
+        *root = y;
+    } else if (x == x->parent->left) {
+        x->parent->left = y;
+    } else {
+        x->parent->right = y;
+    }
+    y->left = x;
+    x->parent = y;
+}
+
+// Helper function for right rotation
+void rightRotate(Node** root, Node* y) {
+    Node* x = y->left;
+    y->left = x->right;
+    if (x->right != NULL) {
+        x->right->parent = y;
+    }
+    x->parent = y->parent;
+    if (y->parent == NULL) {
+        *root = x;
+    } else if (y == y->parent->left) {
+        y->parent->left = x;
+    } else {
+        y->parent->right = x;
+    }
+    x->right = y;
+    y->parent = x;
+}
+
+// Function to fix violations after insertion
+void fixInsertion(Node** root, Node* node) {
+    Node* parent = NULL;
+    Node* grandparent = NULL;
+
+    while ((node != *root) && (node->color != BLACK) && (node->parent->color == RED)) {
+        parent = node->parent;
+        grandparent = parent->parent;
+
+        // Case A: Parent is the left child of grandparent
+        if (parent == grandparent->left) {
+            Node* uncle = grandparent->right;
+            // Case 1: Uncle is red - recolor
+            if (uncle != NULL && uncle->color == RED) {
+                grandparent->color = RED;
+                parent->color = BLACK;
+                uncle->color = BLACK;
+                node = grandparent;
+            } else {
+                // Case 2: Node is right child - left rotation needed
+                if (node == parent->right) {
+                    leftRotate(root, parent);
+                    node = parent;
+                    parent = node->parent;
+                }
+                // Case 3: Node is left child - right rotation needed
+                rightRotate(root, grandparent);
+                parent->color = BLACK;
+                grandparent->color = RED;
+                node = parent;
+            }
+        }
+        // Case B: Parent is the right child of grandparent
+        else {
+            Node* uncle = grandparent->left;
+            // Case 1: Uncle is red - recolor
+            if (uncle != NULL && uncle->color == RED) {
+                grandparent->color = RED;
+                parent->color = BLACK;
+                uncle->color = BLACK;
+                node = grandparent;
+            } else {
+                // Case 2: Node is left child - right rotation needed
+                if (node == parent->left) {
+                    rightRotate(root, parent);
+                    node = parent;
+                    parent = node->parent;
+                }
+                // Case 3: Node is right child - left rotation needed
+                leftRotate(root, grandparent);
+                parent->color = BLACK;
+                grandparent->color = RED;
+                node = parent;
+            }
+        }
+    }
+    (*root)->color = BLACK; // Ensure the root is always black
+}
+
+// Function to insert a new node into the Red-Black Tree
+Node* insert(Node* root, int data) {
+    Node* node = createNode(data);
+    Node* parent = NULL;
+    Node* current = root;
+
+    // Standard BST insertion logic
+    while (current != NULL) {
+        parent = current;
+        if (data < current->data) {
+            current = current->left;
+        } else if (data > current->data) {
+            current = current->right;
+        } else {
+            // Duplicate data not allowed
+            return root;
+        }
+    }
+    node->parent = parent;
+
+    if (parent == NULL) {
+        root = node; // New node is root
+    } else if (data < parent->data) {
+        parent->left = node;
+    } else {
+        parent->right = node;
+    }
+
+    // Fix Red-Black Tree properties
+    fixInsertion(&root, node);
+
+    return root;
+}
+
+// Function to perform an in-order traversal
+void inorderTraversal(Node* root) {
+    if (root != NULL) {
+        inorderTraversal(root->left);
+        printf("%d ", root->data);
+        inorderTraversal(root->right);
+    }
+}
+
+// Main function to test the Red-Black Tree
+int main() {
+    Node* root = NULL;
+
+    root = insert(root, 10);
+    root = insert(root, 20);
+    root = insert(root, 30);
+    root = insert(root, 15);
+    root = insert(root, 25);
+    root = insert(root, 5);
+    root = insert(root, 1);
+
+    printf("In-order traversal of the Red-Black Tree: ");
+    inorderTraversal(root);
+    printf("\n");
+
+    return 0;
+}
